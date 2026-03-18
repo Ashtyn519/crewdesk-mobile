@@ -1,0 +1,1 @@
+{"expo":{"name":"CrewDesk","slug":"crewdesk-mobile","version":"1.0.0","orientation":"portrait","userInterfaceStyle":"dark","scheme":"crewdesk","ios":{"supportsTablet":true,"bundleIdentifier":"com.crewdesk.mobile"},"android":{"package":"com.crewdesk.mobile"},"plugins":["expo-router"],"experiments":{"typedRoutes":true}}}
