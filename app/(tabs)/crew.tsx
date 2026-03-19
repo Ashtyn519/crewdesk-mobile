@@ -1,192 +1,193 @@
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  View, Text, ScrollView, StyleSheet, Animated,
-  TouchableOpacity, RefreshControl, StatusBar, TextInput,
-} from 'react-native';
-import { C } from '../../constants/Colors';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, TextInput, Alert } from 'react-native'
+import { useState } from 'react'
+import Colors from '../../constants/Colors'
+const C = Colors
 
-const CREW = [
-  { id: '1', name: 'Alex Morgan', role: 'Senior Developer', rate: 85, rating: 5, projects: 8, status: 'available', initials: 'AM', color: C.accent },
-  { id: '2', name: 'Jamie Turner', role: 'UX Designer', rate: 70, rating: 5, projects: 6, status: 'busy', initials: 'JT', color: C.info },
-  { id: '3', name: 'Sarah Kim', role: 'Project Manager', rate: 90, rating: 4, projects: 12, status: 'available', initials: 'SK', color: C.success },
-  { id: '4', name: 'Ravi Patel', role: 'Full Stack Dev', rate: 80, rating: 5, projects: 5, status: 'available', initials: 'RP', color: C.purple },
-  { id: '5', name: 'Emma Clarke', role: 'Brand Designer', rate: 75, rating: 4, projects: 9, status: 'busy', initials: 'EC', color: C.warning },
-  { id: '6', name: 'Tom Walsh', role: 'Motion Designer', rate: 65, rating: 4, projects: 4, status: 'available', initials: 'TW', color: '#EC4899' },
-];
+interface Crew { id: number; name: string; role: string; email: string; rate: number; status: string; rating: number; projects: number; initials: string; color: string }
 
-const STATUS_COLOR: Record<string, string> = { available: C.success, busy: C.warning, away: C.textMuted };
+const CREW: Crew[] = [
+  { id: 1, name: 'Ashtyn Cole', role: 'Director', email: 'ashtyn@crewdesk.io', rate: 850, status: 'On Project', rating: 5, projects: 12, initials: 'AC', color: '#F59E0B' },
+  { id: 2, name: 'Marcus Webb', role: 'DOP', email: 'marcus@gmail.com', rate: 650, status: 'On Project', rating: 5, projects: 8, initials: 'MW', color: '#6366F1' },
+  { id: 3, name: 'Priya Sharma', role: 'Editor', email: 'priya@studio.co', rate: 450, status: 'Available', rating: 4, projects: 15, initials: 'PS', color: '#EC4899' },
+  { id: 4, name: 'Jake Torres', role: 'Sound', email: 'jake@audio.com', rate: 380, status: 'Available', rating: 4, projects: 6, initials: 'JT', color: '#10B981' },
+  { id: 5, name: 'Sophie Lane', role: 'Prod Designer', email: 'sophie@design.io', rate: 500, status: 'On Project', rating: 5, projects: 9, initials: 'SL', color: '#EF4444' },
+  { id: 6, name: 'Kai Nakamura', role: 'VFX Artist', email: 'kai@vfx.studio', rate: 600, status: 'Unavailable', rating: 4, projects: 4, initials: 'KN', color: '#06B6D4' },
+]
 
-function StarRow({ rating }: { rating: number }) {
-  return (
-    <View style={{ flexDirection: 'row', gap: 2 }}>
-      {[1,2,3,4,5].map(i => (
-        <Text key={i} style={{ fontSize: 11, color: i <= rating ? C.accent : C.border }}>★</Text>
-      ))}
-    </View>
-  );
-}
+const STATUS_COLORS: Record<string, string> = { Available: '#10B981', 'On Project': '#F59E0B', Unavailable: '#9CA3AF' }
 
-function CrewCard({ member, index }: { member: typeof CREW[0]; index: number }) {
-  const scale = useRef(new Animated.Value(0.92)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
+export default function CrewScreen() {
+  const [crew, setCrew] = useState<Crew[]>(CREW)
+  const [filter, setFilter] = useState('All')
+  const [selected, setSelected] = useState<Crew | null>(null)
+  const [invite, setInvite] = useState(false)
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteRole, setInviteRole] = useState('')
+  const [inviteSent, setInviteSent] = useState(false)
 
-  useEffect(() => {
-    Animated.parallel([
-      Animated.spring(scale, { toValue: 1, delay: index * 70, useNativeDriver: true, tension: 100, friction: 8 }),
-      Animated.timing(opacity, { toValue: 1, delay: index * 70, duration: 280, useNativeDriver: true }),
-    ]).start();
-  }, []);
+  const filtered = crew.filter(m => filter === 'All' || m.status === filter)
+  const available = crew.filter(m => m.status === 'Available').length
+  const onProject = crew.filter(m => m.status === 'On Project').length
 
   return (
-    <Animated.View style={[styles.card, { transform: [{ scale }], opacity }]}>
-      <View style={styles.cardInner}>
-        <View style={[styles.avatar, { backgroundColor: member.color + '25', borderColor: member.color + '50' }]}>
-          <Text style={[styles.avatarTxt, { color: member.color }]}>{member.initials}</Text>
-        </View>
-        <View style={styles.info}>
-          <View style={styles.nameRow}>
-            <Text style={styles.name}>{member.name}</Text>
-            <View style={[styles.statusDot, { backgroundColor: STATUS_COLOR[member.status] }]} />
-          </View>
-          <Text style={styles.role}>{member.role}</Text>
-          <StarRow rating={member.rating} />
-        </View>
-        <View style={styles.rateBox}>
-          <Text style={[styles.rate, { color: member.color }]}>£{member.rate}</Text>
-          <Text style={styles.rateLabel}>/hr</Text>
-        </View>
-      </View>
-      <View style={styles.cardFooter}>
-        <Text style={styles.footerTxt}>{member.projects} projects completed</Text>
-        <View style={[styles.statusPill, { backgroundColor: STATUS_COLOR[member.status] + '15' }]}>
-          <Text style={[styles.statusTxt, { color: STATUS_COLOR[member.status] }]}>
-            {member.status.charAt(0).toUpperCase() + member.status.slice(1)}
-          </Text>
-        </View>
-      </View>
-    </Animated.View>
-  );
-}
-
-export default function Crew() {
-  const [search, setSearch] = useState('');
-  const [refreshing, setRefreshing] = useState(false);
-
-  const filtered = CREW.filter(m =>
-    m.name.toLowerCase().includes(search.toLowerCase()) ||
-    m.role.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1500);
-  };
-
-  return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={C.bg} />
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.headerTitle}>Crew</Text>
-          <Text style={styles.headerSub}>{CREW.filter(m => m.status === 'available').length} available</Text>
-        </View>
-        <TouchableOpacity style={styles.inviteBtn}>
-          <Text style={styles.inviteTxt}>+ Invite</Text>
+    <View style={s.screen}>
+      <View style={s.header}>
+        <Text style={s.title}>Crew</Text>
+        <TouchableOpacity activeOpacity={0.7} onPress={() => { setInvite(true); setInviteSent(false) }} style={s.addBtn}>
+          <Text style={s.addBtnText}>+ Invite</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.searchBox}>
-        <Text style={styles.searchIcon}>⌕</Text>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search crew..."
-          placeholderTextColor={C.textMuted}
-          value={search}
-          onChangeText={setSearch}
-        />
-      </View>
-
-      {/* Summary Row */}
-      <View style={styles.summaryRow}>
+      <View style={s.statsRow}>
         {[
-          { label: 'Total', value: CREW.length, color: C.text },
-          { label: 'Available', value: CREW.filter(c => c.status === 'available').length, color: C.success },
-          { label: 'Busy', value: CREW.filter(c => c.status === 'busy').length, color: C.warning },
-        ].map(s => (
-          <View key={s.label} style={styles.summaryItem}>
-            <Text style={[styles.summaryValue, { color: s.color }]}>{s.value}</Text>
-            <Text style={styles.summaryLabel}>{s.label}</Text>
+          { label: 'Total', value: crew.length },
+          { label: 'Available', value: available, color: '#10B981' },
+          { label: 'On Project', value: onProject, color: '#F59E0B' },
+          { label: 'Avg Rate', value: `£${Math.round(crew.reduce((s,m)=>s+m.rate,0)/crew.length)}`, color: '#6366F1' },
+        ].map((st, i) => (
+          <View key={i} style={s.stat}>
+            <Text style={[s.statValue, st.color ? { color: st.color } : {}]}>{st.value}</Text>
+            <Text style={s.statLabel}>{st.label}</Text>
           </View>
         ))}
       </View>
 
-      <ScrollView
-        style={styles.scroll}
-        showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.accent} />}
-      >
-        <View style={styles.list}>
-          {filtered.map((m, i) => <CrewCard key={m.id} member={m} index={i} />)}
-        </View>
-        <View style={{ height: 100 }} />
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.tabsScroll} contentContainerStyle={s.tabsContent}>
+        {['All', 'Available', 'On Project', 'Unavailable'].map(t => (
+          <TouchableOpacity key={t} activeOpacity={0.7} onPress={() => setFilter(t)} style={[s.tab, filter === t && s.tabActive]}>
+            <Text style={[s.tabText, filter === t && s.tabTextActive]}>{t}</Text>
+          </TouchableOpacity>
+        ))}
       </ScrollView>
+
+      <ScrollView style={s.list} showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, paddingTop: 8 }}>
+        {filtered.map(m => (
+          <TouchableOpacity key={m.id} activeOpacity={0.7} onPress={() => setSelected(m)} style={s.card}>
+            <View style={s.cardRow}>
+              <View style={[s.avatar, { backgroundColor: m.color + '30', borderColor: m.color + '60', borderWidth: 1 }]}>
+                <Text style={[s.avatarText, { color: m.color }]}>{m.initials}</Text>
+              </View>
+              <View style={s.cardInfo}>
+                <Text style={s.name}>{m.name}</Text>
+                <Text style={s.role}>{m.role} · £{m.rate}/day</Text>
+                <View style={s.stars}>
+                  {[1,2,3,4,5].map(n => <Text key={n} style={[s.star, { color: n <= m.rating ? '#F59E0B' : '#374151' }]}>★</Text>)}
+                  <Text style={s.projectCount}> ({m.projects} projects)</Text>
+                </View>
+              </View>
+              <View style={[s.badge, { backgroundColor: STATUS_COLORS[m.status] + '20' }]}>
+                <Text style={[s.badgeText, { color: STATUS_COLORS[m.status] }]}>{m.status === 'On Project' ? 'Active' : m.status}</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        ))}
+        <View style={{ height: 32 }} />
+      </ScrollView>
+
+      {/* Detail Modal */}
+      <Modal visible={!!selected} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setSelected(null)}>
+        {selected && (
+          <View style={s.modal}>
+            <View style={s.modalHeader}>
+              <Text style={s.modalTitle}>{selected.name}</Text>
+              <TouchableOpacity onPress={() => setSelected(null)} style={s.closeBtn}><Text style={s.closeBtnText}>✕</Text></TouchableOpacity>
+            </View>
+            <ScrollView style={{ flex: 1, padding: 16 }}>
+              <View style={[s.avatar, { backgroundColor: selected.color + '30', width: 64, height: 64, borderRadius: 20, marginBottom: 16, alignSelf: 'center', borderColor: selected.color + '60', borderWidth: 1 }]}>
+                <Text style={[s.avatarText, { color: selected.color, fontSize: 24 }]}>{selected.initials}</Text>
+              </View>
+              {[['Role', selected.role], ['Email', selected.email], ['Day Rate', `£${selected.rate}`], ['Status', selected.status], ['Projects Done', String(selected.projects)]].map(([k, v]) => (
+                <View key={k} style={s.detailRow}>
+                  <Text style={s.detailKey}>{k}</Text>
+                  <Text style={s.detailVal}>{v}</Text>
+                </View>
+              ))}
+              <View style={s.detailRow}>
+                <Text style={s.detailKey}>Rating</Text>
+                <View style={s.stars}>{[1,2,3,4,5].map(n => <Text key={n} style={[s.star, { color: n <= selected.rating ? '#F59E0B' : '#374151' }]}>★</Text>)}</View>
+              </View>
+            </ScrollView>
+          </View>
+        )}
+      </Modal>
+
+      {/* Invite Modal */}
+      <Modal visible={invite} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setInvite(false)}>
+        <View style={s.modal}>
+          <View style={s.modalHeader}>
+            <Text style={s.modalTitle}>Invite Crew</Text>
+            <TouchableOpacity onPress={() => setInvite(false)} style={s.closeBtn}><Text style={s.closeBtnText}>✕</Text></TouchableOpacity>
+          </View>
+          <View style={{ flex: 1, padding: 16 }}>
+            {inviteSent ? (
+              <View style={s.sentView}>
+                <Text style={s.sentIcon}>✉️</Text>
+                <Text style={s.sentTitle}>Invite Sent!</Text>
+                <Text style={s.sentSub}>Invitation sent to {inviteEmail}</Text>
+                <TouchableOpacity onPress={() => setInvite(false)} style={s.createBtn}>
+                  <Text style={s.createBtnText}>Done</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <>
+                <View style={s.inputGroup}><Text style={s.inputLabel}>Email</Text><TextInput style={s.input} placeholderTextColor="#4B5563" placeholder="crew@example.com" value={inviteEmail} onChangeText={setInviteEmail} keyboardType="email-address" /></View>
+                <View style={s.inputGroup}><Text style={s.inputLabel}>Role</Text><TextInput style={s.input} placeholderTextColor="#4B5563" placeholder="e.g. Camera Operator" value={inviteRole} onChangeText={setInviteRole} /></View>
+                <TouchableOpacity onPress={() => { if (!inviteEmail) return; setInviteSent(true) }} style={s.createBtn}>
+                  <Text style={s.createBtnText}>Send Invite</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
-  );
+  )
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.bg },
-  header: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: 20, paddingTop: 60, paddingBottom: 16,
-  },
-  headerTitle: { fontSize: 24, fontWeight: '800', color: C.text },
-  headerSub: { fontSize: 13, color: C.textMuted, marginTop: 2 },
-  inviteBtn: { backgroundColor: C.accentBg, borderRadius: 10, paddingHorizontal: 16, paddingVertical: 8, borderWidth: 1, borderColor: C.accentBorder },
-  inviteTxt: { fontSize: 14, fontWeight: '700', color: C.accent },
-  searchBox: {
-    flexDirection: 'row', alignItems: 'center', marginHorizontal: 20, marginBottom: 14,
-    backgroundColor: C.surface, borderRadius: 12, paddingHorizontal: 14,
-    borderWidth: 1, borderColor: C.border,
-  },
-  searchIcon: { fontSize: 20, color: C.textMuted, marginRight: 8 },
-  searchInput: { flex: 1, color: C.text, fontSize: 15, paddingVertical: 12 },
-  summaryRow: {
-    flexDirection: 'row', paddingHorizontal: 20, marginBottom: 12, gap: 8,
-  },
-  summaryItem: {
-    flex: 1, backgroundColor: C.surface, borderRadius: 12, padding: 12,
-    borderWidth: 1, borderColor: C.border, alignItems: 'center',
-  },
-  summaryValue: { fontSize: 20, fontWeight: '800', marginBottom: 2 },
-  summaryLabel: { fontSize: 11, color: C.textMuted },
-  scroll: { flex: 1 },
-  list: { paddingHorizontal: 20 },
-  card: {
-    backgroundColor: C.surface, borderRadius: 16, marginBottom: 10,
-    borderWidth: 1, borderColor: C.border, overflow: 'hidden',
-  },
-  cardInner: { flexDirection: 'row', alignItems: 'center', padding: 16 },
-  avatar: {
-    width: 48, height: 48, borderRadius: 14, borderWidth: 1,
-    alignItems: 'center', justifyContent: 'center', marginRight: 12,
-  },
-  avatarTxt: { fontSize: 15, fontWeight: '800' },
-  info: { flex: 1 },
-  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 2 },
-  name: { fontSize: 15, fontWeight: '700', color: C.text },
-  statusDot: { width: 7, height: 7, borderRadius: 4 },
-  role: { fontSize: 12, color: C.textSecondary, marginBottom: 5 },
-  rateBox: { alignItems: 'flex-end' },
-  rate: { fontSize: 18, fontWeight: '800' },
-  rateLabel: { fontSize: 11, color: C.textMuted },
-  cardFooter: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: 16, paddingVertical: 10,
-    borderTopWidth: 1, borderTopColor: C.border,
-    backgroundColor: C.bg + '80',
-  },
-  footerTxt: { fontSize: 12, color: C.textMuted },
-  statusPill: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
-  statusTxt: { fontSize: 11, fontWeight: '600' },
-});
+const s = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: C.bg },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, paddingTop: 8 },
+  title: { fontSize: 22, fontWeight: '800', color: C.text },
+  addBtn: { backgroundColor: C.primary, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 },
+  addBtnText: { color: '#000', fontWeight: '700', fontSize: 13 },
+  statsRow: { flexDirection: 'row', paddingHorizontal: 16, gap: 8, marginBottom: 12 },
+  stat: { flex: 1, backgroundColor: C.surface, borderRadius: 10, padding: 10, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' },
+  statValue: { fontSize: 16, fontWeight: '800', color: C.text },
+  statLabel: { fontSize: 10, color: C.textMuted, marginTop: 2 },
+  tabsScroll: { maxHeight: 44 },
+  tabsContent: { paddingHorizontal: 16, gap: 6, alignItems: 'center' },
+  tab: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 8, backgroundColor: C.surface, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' },
+  tabActive: { backgroundColor: C.primary, borderColor: C.primary },
+  tabText: { fontSize: 12, color: C.textMuted, fontWeight: '500' },
+  tabTextActive: { color: '#000' },
+  list: { flex: 1 },
+  card: { backgroundColor: C.surface, borderRadius: 14, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' },
+  cardRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  avatar: { width: 48, height: 48, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
+  avatarText: { fontWeight: '800', fontSize: 16 },
+  cardInfo: { flex: 1 },
+  name: { fontSize: 14, fontWeight: '700', color: C.text },
+  role: { fontSize: 12, color: C.textMuted, marginTop: 2 },
+  stars: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
+  star: { fontSize: 12 },
+  projectCount: { fontSize: 10, color: C.textMuted },
+  badge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
+  badgeText: { fontSize: 10, fontWeight: '600' },
+  modal: { flex: 1, backgroundColor: C.bg },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)' },
+  modalTitle: { fontSize: 18, fontWeight: '700', color: C.text },
+  closeBtn: { width: 32, height: 32, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.06)', justifyContent: 'center', alignItems: 'center' },
+  closeBtnText: { color: C.textMuted, fontSize: 14 },
+  detailRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.04)' },
+  detailKey: { fontSize: 13, color: C.textMuted },
+  detailVal: { fontSize: 13, color: C.text, fontWeight: '500' },
+  inputGroup: { marginBottom: 16 },
+  inputLabel: { fontSize: 12, color: C.textMuted, marginBottom: 6 },
+  input: { backgroundColor: C.surface, borderRadius: 10, padding: 12, color: C.text, fontSize: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
+  createBtn: { backgroundColor: C.primary, borderRadius: 12, padding: 14, alignItems: 'center', marginTop: 8 },
+  createBtnText: { color: '#000', fontWeight: '700', fontSize: 15 },
+  sentView: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  sentIcon: { fontSize: 56, marginBottom: 16 },
+  sentTitle: { fontSize: 22, fontWeight: '800', color: C.text, marginBottom: 8 },
+  sentSub: { fontSize: 14, color: C.textMuted, marginBottom: 32, textAlign: 'center' },
+})
