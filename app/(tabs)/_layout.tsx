@@ -1,87 +1,55 @@
-import { Tabs } from 'expo-router';
-import { View, Text, StyleSheet } from 'react-native';
-import { C } from '../../constants/Colors';
+import { Tabs } from 'expo-router'
+import { View, Text, StyleSheet } from 'react-native'
+import C from '../../constants/Colors'
 
-function TabIcon({ focused, icon, label }: { focused: boolean; icon: string; label: string }) {
+function TabIcon({ emoji, label, focused }: { emoji: string; label: string; focused: boolean }) {
   return (
-    <View style={[styles.tabItem, focused && styles.tabItemActive]}>
-      <Text style={[styles.tabIcon, { color: focused ? C.accent : C.textMuted }]}>{icon}</Text>
-      <Text style={[styles.tabLabel, { color: focused ? C.accent : C.textMuted }]}>{label}</Text>
+    <View style={[styles.iconWrap, focused && styles.iconWrapActive]}>
+      <Text style={styles.emoji}>{emoji}</Text>
+      <Text style={[styles.iconLabel, focused && styles.iconLabelActive]}>{label}</Text>
     </View>
-  );
+  )
 }
 
 export default function TabLayout() {
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: styles.tabBar,
-        tabBarShowLabel: false,
-        tabBarActiveTintColor: C.accent,
-        tabBarInactiveTintColor: C.textMuted,
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="◇" label="Home" />,
-        }}
-      />
-      <Tabs.Screen
-        name="projects"
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="◈" label="Projects" />,
-        }}
-      />
-      <Tabs.Screen
-        name="crew"
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="◉" label="Crew" />,
-        }}
-      />
-      <Tabs.Screen
-        name="invoices"
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="◎" label="Invoices" />,
-        }}
-      />
-      <Tabs.Screen
-        name="messages"
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="◯" label="Messages" />,
-        }}
-      />
+    <Tabs screenOptions={{
+      headerShown: false,
+      tabBarStyle: styles.tabBar,
+      tabBarShowLabel: false,
+    }}>
+      <Tabs.Screen name="index" options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="📊" label="Dashboard" focused={focused} /> }} />
+      <Tabs.Screen name="projects" options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="📁" label="Projects" focused={focused} /> }} />
+      <Tabs.Screen name="crew" options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="👥" label="Crew" focused={focused} /> }} />
+      <Tabs.Screen name="invoices" options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="💷" label="Invoices" focused={focused} /> }} />
+      <Tabs.Screen name="messages" options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="💬" label="Messages" focused={focused} /> }} />
+      <Tabs.Screen name="settings" options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="⚙️" label="Settings" focused={focused} /> }} />
     </Tabs>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: C.surface,
+    backgroundColor: '#060C18',
+    borderTopColor: 'rgba(255,255,255,0.05)',
     borderTopWidth: 1,
-    borderTopColor: C.border,
-    height: 80,
-    paddingBottom: 8,
-    paddingTop: 8,
+    paddingTop: 6,
+    paddingBottom: 20,
+    height: 76,
   },
-  tabItem: {
+  iconWrap: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 10,
-    gap: 3,
+    borderRadius: 12,
+    minWidth: 50,
+    gap: 2,
   },
-  tabItemActive: {
-    backgroundColor: C.accentBg,
+  iconWrapActive: {
+    backgroundColor: 'rgba(245,158,11,0.12)',
   },
-  tabIcon: {
-    fontSize: 20,
-  },
-  tabLabel: {
-    fontSize: 10,
-    fontWeight: '600',
-    letterSpacing: 0.3,
-  },
-});
+  emoji: { fontSize: 20 },
+  iconLabel: { fontSize: 9, color: '#64748b', fontWeight: '500' },
+  iconLabelActive: { color: '#f59e0b' },
+})
