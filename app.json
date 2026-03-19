@@ -53,9 +53,13 @@
       "typedRoutes": true
     },
     "extra": {
+      "router": {
+        "origin": false
+      },
       "eas": {
-        "projectId": "crewdesk-mobile"
+        "projectId": "21e2d7ec-3aa5-476e-bbb0-ceb7feac8b1b"
       }
-    }
+    },
+    "owner": "crewdesk"
   }
 }
