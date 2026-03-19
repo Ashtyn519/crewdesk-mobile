@@ -18,9 +18,10 @@ export default function TabLayout() {
       tabBarStyle: styles.tabBar,
       tabBarShowLabel: false,
     }}>
-      <Tabs.Screen name="index" options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="📊" label="Dashboard" focused={focused} /> }} />
+      <Tabs.Screen name="index" options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="📊" label="Home" focused={focused} /> }} />
       <Tabs.Screen name="projects" options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="📁" label="Projects" focused={focused} /> }} />
       <Tabs.Screen name="crew" options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="👥" label="Crew" focused={focused} /> }} />
+      <Tabs.Screen name="contracts" options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="📝" label="Contracts" focused={focused} /> }} />
       <Tabs.Screen name="invoices" options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="💷" label="Invoices" focused={focused} /> }} />
       <Tabs.Screen name="messages" options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="💬" label="Messages" focused={focused} /> }} />
       <Tabs.Screen name="settings" options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="⚙️" label="Settings" focused={focused} /> }} />
@@ -40,16 +41,16 @@ const styles = StyleSheet.create({
   iconWrap: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 8,
+    paddingHorizontal: 6,
     paddingVertical: 4,
-    borderRadius: 12,
-    minWidth: 50,
+    borderRadius: 10,
+    minWidth: 44,
     gap: 2,
   },
   iconWrapActive: {
     backgroundColor: 'rgba(245,158,11,0.12)',
   },
-  emoji: { fontSize: 20 },
+  emoji: { fontSize: 18 },
   iconLabel: { fontSize: 9, color: '#64748b', fontWeight: '500' },
   iconLabelActive: { color: '#f59e0b' },
 })
