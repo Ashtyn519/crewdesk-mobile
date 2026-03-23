@@ -121,7 +121,7 @@ export default function SettingsScreen() {
                 <View style={styles.currentBadge}><Text style={styles.currentBadgeText}>Current</Text></View>
               </View>
               <TouchableOpacity style={styles.upgradePlanBtn}>
-                <Text style={styles.upgradePlanText}>Upgrade to Pro — £29/mo</Text>
+                              <Text style={styles.upgradePlanText}>Upgrade to Pro — £14.99/mo · Start free trial</Text>
               </TouchableOpacity>
             </Card>
             <Card title="Danger Zone">
